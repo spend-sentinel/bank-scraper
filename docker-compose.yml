@@ -1,0 +1,17 @@
+version: "3.8"
+services:
+  spend-sentinel-bank-scraper:
+    build: .
+    container_name: spend-sentinel-bank-scraper
+    environment:
+      - serverUrl="http://localhost:8080"
+      - visacalUsername=bennoama
+      - visacalPassword=bgr5znTj
+      # - maxUsername=
+      # - maxPassword=
+      # - isracardId=-
+      # - isracard6digits=-
+      # - isracardPassword=-
+      # - amexUsername=-
+      # - amexCard6Digits=-
+      # - amexPassword=-
