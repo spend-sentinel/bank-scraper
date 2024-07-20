@@ -24,7 +24,7 @@ const postTransactionToServer = async (transaction:Transaction, cardNumber:strin
       "CardNumber": cardNumber,
   }
   try{
-    const response = await axios.post(serverUrl, data);
+    await axios.post(serverUrl, data);
     // console.log("Inserted transaction " + transaction.identifier + " to database");
     return true;
   } catch (e){
@@ -43,7 +43,7 @@ const credentialsValid = (credentials:any):boolean => {
 }
 
 const scrapeAllProviders = async () => {
-  let latestTransaction = new Date(0);
+  // let latestTransaction = new Date(0);
   const companiesLastTransactions: Record<string, Promise<Date>> = {};
 
   for (const key in credentialsMap) {
@@ -59,7 +59,7 @@ const scrapeAllProviders = async () => {
 
   for (const companyId in companiesLastTransactions) {
     const lastTransaction = await companiesLastTransactions[companyId];
-    if (lastTransaction !== new Date(0)) {
+    if (lastTransaction !== new Date(0) && lastTransaction) {
       updateLatestTransactionDate(companyId, lastTransaction);
     }
   }

@@ -25,13 +25,15 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "build": "tsc"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@osskit/prettier-config": "^0.0.1",
+    "@osskit/tsconfig": "^0.0.7",
     "@types/jest": "^29.5.3",
     "@types/node": "^20.4.1",
     "jest": "^29.6.2",
