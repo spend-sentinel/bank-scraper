@@ -5,9 +5,10 @@ export const getLastTransactionDate = (companyId:string):Date => {
   const data = file.data;
   if (undefined === data[companyId]) {
     file.set(companyId, 0);
+    file.save();
+    return new Date(0);
   }
-  file.save();
-  return new Date(0);
+  return new Date(data[companyId]);
 }
   
 export const updateLatestTransactionDate = (companyId:string, latestTransactionDate: Date) => {
