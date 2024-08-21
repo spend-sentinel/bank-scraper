@@ -23,6 +23,7 @@ export type MoneyTransaction = {
   Description: string;
   TransactionMonth: string;
   CardNumber: string;
+  ReportedToBot: boolean
 };
 
 export type MonthlyStatus = {

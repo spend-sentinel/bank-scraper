@@ -4,6 +4,13 @@ services:
     build: .
     container_name: spend-sentinel-bank-scraper
     environment:
-      - serverUrl="http://localhost:8080"
+      - serverUrl=http://transaction-api:8080
     env_file:
       - ./secrets/loginInformation.txt
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    external:
+      name: full-spend-sentinel_app-network

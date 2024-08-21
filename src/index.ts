@@ -1,7 +1,7 @@
 import { CompanyTypes, ScraperCredentials, ScraperOptions, ScraperScrapingResult, createScraper } from 'israeli-bank-scrapers';
 import axios from 'axios'
 import { Transaction, TransactionsAccount } from 'israeli-bank-scrapers/lib/transactions';
-import { getTimeInMS, } from './scrape-details';
+import { getTimeInMS as minutesToMS, } from './scrape-details';
 import { getLastTransactionDate, updateLatestTransactionDate, } from './shared/lastTransactionState';
 import { getCredentialsMap, serverUrl } from './environment';
 import { start } from 'repl';
@@ -12,21 +12,22 @@ const options:ScraperOptions = {
   companyId: CompanyTypes.visaCal, 
   startDate: new Date(0),
   combineInstallments: false,
-  showBrowser: true,
+  showBrowser: false,
 };
 
 const postTransactionToServer = async (transaction:Transaction, cardNumber:string):Promise<boolean> => {
   const data = {
-      "TransNum": transaction.identifier !== null ? transaction.identifier : transaction.description + transaction.date,
+      "TransNum": transaction.identifier ? transaction.identifier : transaction.date,
       "Amount": transaction.originalAmount / (transaction.installments ? transaction.installments.total : 1),
       "Currency": transaction.chargedCurrency,
       "Description": transaction.description,
       "TransactionDate": transaction.date,
       "CardNumber": cardNumber,
+      "ReportedToBot": false
   }
-  try{
+  try {
     await axios.post(serverUrl, data);
-    console.log("Inserted transaction " + transaction.identifier + " to database");
+    console.log("Inserted transaction " + data.TransNum + " to database");
     return true;
   } catch (e){
     console.log("Failed to post transaction " + transaction.identifier, e);
@@ -44,6 +45,7 @@ const credentialsValid = (credentials:ScraperCredentials):boolean => {
 }
 
 const scrapeAllProviders = async () => {
+  options.executablePath = "/usr/bin/chromium-browser";
   const companiesLastTransactions: Record<string, Promise<Date>> = {};
   for (const key in credentialsMap) {
     const companyId: CompanyTypes = key as CompanyTypes;
@@ -52,7 +54,6 @@ const scrapeAllProviders = async () => {
       console.log("Warning: missing credentials for " + companyId);
       continue;
     }
-    console.log(credentials);
     const latestForCompany: Promise<Date> = scrapeProvider(companyId, credentials);
     companiesLastTransactions[key] = latestForCompany; 
   }
@@ -69,10 +70,13 @@ const scrapeAllProviders = async () => {
 
 const scrapeProvider = async (companyId:CompanyTypes, credentials:ScraperCredentials) => {
   options.startDate = getLastTransactionDate(companyId);
+  options.startDate.setSeconds(options.startDate.getSeconds() + 1);
   try {
-    options['companyId'] = companyId;
+    options.companyId = companyId;
     const scraper = createScraper(options);
+    console.log("Scraping", companyId);
     const scrapeResult = await scraper.scrape(credentials);
+    console.log("scrape result:", scrapeResult);
     if (!scrapeResult.success) {
       console.log("Scraping failed for following reason:", scrapeResult.errorType + ", for company " + companyId);
       return new Date(0);
@@ -83,6 +87,7 @@ const scrapeProvider = async (companyId:CompanyTypes, credentials:ScraperCredent
     const latestForCompany = handleScrapeResult(scrapeResult);
     console.log("Done for " + companyId);
     return latestForCompany;
+
   } catch(e) {
     console.error(`scraping failed for company ${companyId} the following reason: ${e}`);
     return new Date(0)
@@ -99,9 +104,11 @@ const handleScrapeResult = async (scrapeResult:ScraperScrapingResult) => {
   await Promise.all(scrapeResult.accounts.map(async (account: TransactionsAccount) => {
     const transactions = account.txns;
     await Promise.all(transactions.map(async (transaction: Transaction) => {
-      if (await postTransactionToServer(transaction, account.accountNumber)) {
-        const transactionDate = new Date(transaction.date);
-        latestForCompany = transactionDate > latestForCompany ? transactionDate : latestForCompany;
+      if (new Date(transaction.date) <= new Date()) {
+        if (await postTransactionToServer(transaction, account.accountNumber)) {
+          const transactionDate = new Date(transaction.date);
+          latestForCompany = transactionDate > latestForCompany ? transactionDate : latestForCompany;
+        }
       }
     }));
   }));
@@ -109,5 +116,5 @@ const handleScrapeResult = async (scrapeResult:ScraperScrapingResult) => {
   return latestForCompany;
 }
 
-setInterval(scrapeAllProviders, getTimeInMS(5));
+setInterval(scrapeAllProviders, minutesToMS(5));
 scrapeAllProviders();
