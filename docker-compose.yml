@@ -1,12 +1,12 @@
-version: "3.9"
+version: "3.8"
 services:
   spend-sentinel-bank-scraper:
     build: .
     container_name: spend-sentinel-bank-scraper
     environment:
-      - serverUrl=http://transaction-api:8080
+      - TRANSACTION_API_URL=http://transaction-api:8080
     env_file:
-      - ./secrets/loginInformation.txt
+      - ./secrets/loginInformation.env
     networks:
       - app-network
 
