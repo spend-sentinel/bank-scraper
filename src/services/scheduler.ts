@@ -1,4 +1,4 @@
-import { minutesToMS } from "../scrape-details";
+import { minutesToMS } from "./scrape-details";
 import { scrapeAllProviders } from "./scraper";
 import { setTimeout } from "timers/promises";
 

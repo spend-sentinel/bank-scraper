@@ -9,8 +9,10 @@ services:
       - ./secrets/loginInformation.env
     networks:
       - app-network
+    cap_add:
+      - SYS_ADMIN
 
 networks:
   app-network:
     external:
-      name: full-spend-sentinel_app-network
+      name: spend-sentinel-app-network
