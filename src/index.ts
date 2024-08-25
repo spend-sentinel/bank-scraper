@@ -1,6 +1,5 @@
 import { startScheduler } from "./services/scheduler";
 
-
 const main = async () => {
   try {
     console.log("Starting scraping process...");
