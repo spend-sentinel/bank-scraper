@@ -1,8 +1,8 @@
-const editJsonFile = require("edit-json-file");
+import editJsonFile from "edit-json-file";
 
 export const getLastTransactionDate = (companyId:string):Date => {
   const file = editJsonFile('./lastTransactions.json');
-  const data = file.data;
+  const data = file.get();
   if (undefined === data[companyId]) {
     file.set(companyId, 0);
     file.save();
@@ -16,5 +16,5 @@ export const getLastTransactionDate = (companyId:string):Date => {
 export const updateLatestTransactionDate = (companyId:string, latestTransactionDate: Date) => {
   const file = editJsonFile('./lastTransactions.json');
   file.set(companyId, latestTransactionDate.getTime());
-  file.save(); // await   TODO
+  file.save(); 
 }

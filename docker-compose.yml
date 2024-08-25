@@ -9,8 +9,6 @@ services:
       - ./secrets/loginInformation.env
     networks:
       - app-network
-    cap_add:
-      - SYS_ADMIN
 
 networks:
   app-network:
