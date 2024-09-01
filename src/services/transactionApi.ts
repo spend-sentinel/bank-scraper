@@ -14,7 +14,6 @@ export const postTransactionToServer = async (transaction:Transaction, cardNumbe
     }
     try {
       await axios.post(transactionApiUrl, data);
-      console.log("Inserted transaction " + data.TransNum + " to database");
       return true;
     } catch (e){
       console.log("Failed to post transaction " + transaction.identifier, e);

@@ -9,7 +9,7 @@ export const startScheduler = async () => {
             console.log("Scraping attempt #", i)
             await scrapeAllProviders();
             console.log("Attempt", i++, "Finished")
-            await setTimeout(minutesToMS(5));
+            await setTimeout(minutesToMS(0.5));
         } catch (e) {
             console.log("Scraping failed in time:", new Date(), "for following reason:", e);
         }

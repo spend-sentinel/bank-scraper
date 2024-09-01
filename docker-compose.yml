@@ -9,6 +9,8 @@ services:
       - ./secrets/loginInformation.env
     networks:
       - app-network
+    volumes:
+      - ./:/app
 
 networks:
   app-network:

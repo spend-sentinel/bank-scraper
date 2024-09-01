@@ -9,7 +9,7 @@ export const getLastTransactionDate = (companyId:string):Date => {
     return new Date(0);
   }
   const date = new Date(data[companyId])
-  date.setSeconds(date.getSeconds() + 1);
+  date.setSeconds(date.getSeconds() + 10);
   return date;
 }
   
@@ -17,4 +17,5 @@ export const updateLatestTransactionDate = (companyId:string, latestTransactionD
   const file = editJsonFile('./lastTransactions.json');
   file.set(companyId, latestTransactionDate.getTime());
   file.save(); 
+  console.log(file.get());
 }

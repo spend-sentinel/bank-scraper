@@ -3,7 +3,6 @@ import { CompanyTypes, ScraperCredentials } from "israeli-bank-scrapers";
 
 
 export const transactionApiUrl = env.get("TRANSACTION_API_URL").required().asString();
-export const puppeteerExecutablePath = env.get("PUPPETEER_EXECUTABLE_PATH").required().asString();
 
 export const getCredentialsMap = ():Partial<Record<CompanyTypes, ScraperCredentials>> => {
     const credentialsMap: Partial<Record<CompanyTypes, ScraperCredentials>> = {};
@@ -33,6 +32,6 @@ export const getCredentialsMap = ():Partial<Record<CompanyTypes, ScraperCredenti
     return credentialsMap
 }
 
-const getCredentialsVariable = (name:string): CompanyTypes => {
-    return env.get(name).asString() as CompanyTypes;
+const getCredentialsVariable = (varName:string): CompanyTypes => {
+    return env.get(varName).asString() as CompanyTypes;
 }
