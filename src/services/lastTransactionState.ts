@@ -17,5 +17,4 @@ export const updateLatestTransactionDate = (companyId:string, latestTransactionD
   const file = editJsonFile('./lastTransactions.json');
   file.set(companyId, latestTransactionDate.getTime());
   file.save(); 
-  console.log(file.get());
 }
