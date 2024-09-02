@@ -11,9 +11,11 @@ services:
     networks:
       - app-network
     volumes:
-      - ./scraper-volume:/app
+      - scraper-volume:/service
 
 networks:
   app-network:
     external:
       name: spend-sentinel-app-network
+volumes:
+  scraper-volume:
