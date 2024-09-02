@@ -11,7 +11,7 @@ export const options:ScraperOptions = {
   startDate: new Date(0),
   combineInstallments: false,
   showBrowser: false,
-  defaultTimeout: minutesToMS(5),
+  defaultTimeout: minutesToMS(1),
   timeout: minutesToMS(1),
   args: ['--no-sandbox']
 };
