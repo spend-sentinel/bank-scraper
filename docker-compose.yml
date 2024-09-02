@@ -5,12 +5,13 @@ services:
     container_name: spend-sentinel-bank-scraper
     environment:
       - TRANSACTION_API_URL=http://transaction-api:8080
+      - SCRAPE_INTERVAL=1
     env_file:
       - ./secrets/loginInformation.env
     networks:
       - app-network
     volumes:
-      - ./:/app
+      - ./scraper-volume:/app
 
 networks:
   app-network:
