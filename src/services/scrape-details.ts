@@ -1,7 +1,17 @@
+import { CompanyTypes, ScraperOptions } from "israeli-bank-scrapers";
+
 export const filePath = "./lastTransactionDate.json";
 
 export const minutesToMS = (numMinutes: number) => {
-  const secondsInMin = 60;
-  const millisecondsInSec = 1000;
-  return (numMinutes * secondsInMin * millisecondsInSec);
+  return (numMinutes * 60 * 1000);
 }
+
+export const options:ScraperOptions = {
+  companyId: CompanyTypes.visaCal, 
+  startDate: new Date(0),
+  combineInstallments: false,
+  showBrowser: false,
+  defaultTimeout: minutesToMS(5),
+  timeout: minutesToMS(1),
+  args: ['--no-sandbox']
+};

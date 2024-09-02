@@ -10,7 +10,7 @@ export const postTransactionToServer = async (transaction:Transaction, cardNumbe
         "Description": transaction.description,
         "TransactionDate": transaction.date,
         "CardNumber": cardNumber,
-        "ReportedToBot": false
+        "ReportedToBot": false,
     }
     try {
       await axios.post(transactionApiUrl, data);

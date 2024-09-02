@@ -1,20 +1,12 @@
 import { CompanyTypes } from "israeli-bank-scrapers/lib/definitions";
-import { ScraperCredentials, ScraperOptions, ScraperScrapingResult } from "israeli-bank-scrapers/lib/scrapers/interface";
+import { ScraperCredentials, ScraperScrapingResult } from "israeli-bank-scrapers/lib/scrapers/interface";
 import { credentialsMap, credentialsValid } from "./credentials";
 import { Transaction, TransactionsAccount } from "israeli-bank-scrapers/lib/transactions";
 import { updateLatestTransactionDate, getLastTransactionDate } from "./lastTransactionState";
 import { postTransactionToServer } from "./transactionApi";
 import { createScraper } from "israeli-bank-scrapers";
+import { options } from "./scrape-details";
 
-const options:ScraperOptions = {
-    companyId: CompanyTypes.visaCal, 
-    startDate: new Date(0),
-    combineInstallments: false,
-    showBrowser: false,
-    defaultTimeout: 5 * 60 * 1000,
-    timeout: 5 * 60 * 1000,
-    args: ['--no-sandbox']
-  };
 
 export const scrapeAllProviders = async () => {
     await Promise.all(Object.entries(credentialsMap)
@@ -32,11 +24,12 @@ export const scrapeAllProviders = async () => {
   };
   
   const scrapeProvider = async (companyId:CompanyTypes, credentials:ScraperCredentials) => {
-    options.startDate = getLastTransactionDate(companyId);
-    options.companyId = companyId;
+    const companyOptions = {...options};
+    companyOptions.startDate = getLastTransactionDate(companyId);
+    companyOptions.companyId = companyId;
     try {
-      const scraper = createScraper(options);
-      console.log("Scraping", companyId, options.startDate, credentials);
+      const scraper = createScraper(companyOptions);
+      console.log("Scraping", companyId, "from date", companyOptions.startDate);
       const scrapeResult = await scraper.scrape(credentials);
       if (!scrapeResult.success) {
         console.log("Scraping failed for following reason:", scrapeResult.errorType + ", for company " + companyId);
@@ -44,7 +37,9 @@ export const scrapeAllProviders = async () => {
       } else {
         console.log("Successfully scraped", companyId);
       }
-  
+      scrapeResult.accounts?.forEach((account) => {
+        console.log(`found ${account.txns.length} transactions for account ${account.accountNumber}`)
+      })
       const latestForCompany = handleScrapeResult(scrapeResult);
       console.log("Done for " + companyId + "latest is " + await latestForCompany);
       return latestForCompany;
@@ -55,14 +50,16 @@ export const scrapeAllProviders = async () => {
     }
   }
   
-  const noTransactionsFound = (scrapeResult:ScraperScrapingResult) => {
+  const transactionsFound = (scrapeResult:ScraperScrapingResult) => {
     let foundTransactions = false;
     scrapeResult.accounts?.forEach((account:TransactionsAccount) => {
+      account.txns = account.txns.filter((transaction) => new Date(transaction.date) < new Date()); // post only transactions that happened (not future expenses such as installments)
       if (account.txns.length !== 0) {
         foundTransactions = true;
       }
     });
-    if (!foundTransactions) return undefined;
+
+    return foundTransactions;
   }
 
   const handleScrapeResult = async (scrapeResult:ScraperScrapingResult) => {
@@ -71,22 +68,19 @@ export const scrapeAllProviders = async () => {
       return undefined
     }
 
-    if (noTransactionsFound(scrapeResult)) return undefined
+    if (!transactionsFound(scrapeResult)) return undefined
     
     let latestForCompany = new Date(0);
     await Promise.all(scrapeResult.accounts.map(async (account: TransactionsAccount) => {
       const transactions = account.txns;
-      console.log("found", transactions.length, "transactions");
       await Promise.all(transactions.map(async (transaction: Transaction) => {
-        if (new Date(transaction.date) <= new Date()) {
-          if (await postTransactionToServer(transaction, account.accountNumber)) {
-            const transactionDate = new Date(transaction.date);
-            latestForCompany = transactionDate > latestForCompany ? transactionDate : latestForCompany;
-          }
+        if (await postTransactionToServer(transaction, account.accountNumber)) {
+          const transactionDate = new Date(transaction.date);
+          latestForCompany = transactionDate > latestForCompany ? transactionDate : latestForCompany;
         }
       }));
     }));
 
     console.log("Newest date is", latestForCompany);
-    return latestForCompany;
+    return latestForCompany == new Date(0) ? undefined : latestForCompany;
   }

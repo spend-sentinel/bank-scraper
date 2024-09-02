@@ -3,8 +3,9 @@ import { CompanyTypes, ScraperCredentials } from "israeli-bank-scrapers";
 
 
 export const transactionApiUrl = env.get("TRANSACTION_API_URL").required().asString();
+export const scrapeInterval = env.get("SCRAPE_INTERVAL").asInt() ?? 1;
 
-export const getCredentialsMap = ():Partial<Record<CompanyTypes, ScraperCredentials>> => {
+export const initCredentialsMap = ():Partial<Record<CompanyTypes, ScraperCredentials>> => {
     const credentialsMap: Partial<Record<CompanyTypes, ScraperCredentials>> = {};
 
     credentialsMap[CompanyTypes.max] = {
